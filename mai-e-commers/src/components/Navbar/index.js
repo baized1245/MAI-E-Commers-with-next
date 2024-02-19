@@ -4,12 +4,14 @@ import { GlobalContext } from '@/context'
 import { adminNavOptions, navOptions } from '@/utils'
 import React, { Fragment, useContext } from 'react'
 import CommonModal from '../CommonModal'
+import Cookies from 'js-cookie'
+import { useRouter } from 'next/navigation'
 
 const isAdminView = false
-const isAuthUser = false
-const user = {
-  role: 'admin',
-}
+// const isAuthUser = false
+// const user = {
+//   role: 'admin',
+// }
 
 function NavItems({ isModalView = false }) {
   return (
@@ -49,6 +51,18 @@ function NavItems({ isModalView = false }) {
 const Navbar = () => {
   const { showNavModal, setShowNavModal } = useContext(GlobalContext)
 
+  const { user, isAuthUser, setIsAuthUser, setUser } = useContext(GlobalContext)
+
+  const router = useRouter()
+
+  function handleLogout() {
+    setIsAuthUser(false)
+    setUser(null)
+    Cookies.remove('token')
+    localStorage.clear()
+    router.push('/')
+  }
+
   return (
     <>
       <nav className="bg-white fixed w-full z-20 top-0 left-0 border-b border-gray-200">
@@ -74,9 +88,13 @@ const Navbar = () => {
             ) : null}
 
             {isAuthUser ? (
-              <button className="btn">Logout</button>
+              <button onClick={handleLogout} className="btn">
+                Logout
+              </button>
             ) : (
-              <button className="btn">Login</button>
+              <button onClick={() => router.push('/login')} className="btn">
+                Login
+              </button>
             )}
             <button
               data-collapse-toggle="navbar-sticky"

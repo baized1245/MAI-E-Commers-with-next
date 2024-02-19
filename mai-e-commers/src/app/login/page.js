@@ -1,13 +1,59 @@
 'use client'
 
-import React from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { loginFormControls } from '@/utils'
 import InputComponent from '@/components/FormElements/InputComponent'
 import SelectComponent from '@/components/FormElements/SelectComponent'
 import { useRouter } from 'next/navigation'
+import { login } from '@/services/login'
+import { GlobalContext } from '@/context'
+import Cookies from 'js-cookie'
+
+const initialFormData = {
+  email: '',
+  password: '',
+}
 
 export default function Login() {
+  const [formData, setFormData] = useState(initialFormData)
+  const { isAuthUser, setIsAuthUser, user, setUser } = useContext(GlobalContext)
+
   const router = useRouter()
+
+  // console.log(formData)
+
+  // form validation check
+  function isValidForm() {
+    return formData &&
+      formData.email &&
+      formData.email.trim() !== '' &&
+      formData.password &&
+      formData.password.trim() !== ''
+      ? true
+      : false
+  }
+
+  async function handleLogin() {
+    const res = await login(formData)
+
+    // console.log(res)
+
+    if (res.success) {
+      setIsAuthUser(true)
+      setUser(res?.finalData?.user)
+      setFormData(initialFormData)
+      Cookies.set('token', res?.finalData.token)
+      localStorage.setItem('user', JSON.stringify(res?.finalData?.user))
+    } else {
+      setIsAuthUser(false)
+    }
+  }
+
+  console.log(isAuthUser, user)
+
+  useEffect(() => {
+    if (isAuthUser) router.push('/')
+  }, [isAuthUser])
 
   return (
     <div className="bg-white relative">
@@ -23,17 +69,24 @@ export default function Login() {
                 {loginFormControls.map((controlIem) =>
                   controlIem.componentType === 'input' ? (
                     <InputComponent
-                      label={controlIem.type}
+                      type={controlIem.type}
                       placeholder={controlIem.placeholder}
-                      onChange={controlIem.label}
-                      // value={undefined}
-                      // type={undefined}
+                      label={controlIem.label}
+                      value={formData[controlIem.id]}
+                      onChange={(event) => {
+                        setFormData({
+                          ...formData,
+                          [controlIem.id]: event.target.value,
+                        })
+                      }}
                     />
                   ) : null
                 )}
                 <button
-                  className="inline-flex w-full items-center justify-center bg-black px-6 py-4 text-lg 
+                  className="disabled:opacity-45 inline-flex w-full items-center justify-center bg-black px-6 py-4 text-lg 
                 text-white transition-all duration-200 ease-in-out focus:shadow font-medium uppercase tracking-wide"
+                  disabled={!isValidForm()}
+                  onClick={handleLogin}
                 >
                   Login
                 </button>
