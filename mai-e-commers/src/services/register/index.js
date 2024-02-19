@@ -8,7 +8,7 @@ export const registerNewUser = async (formData) => {
       body: JSON.stringify(formData),
     })
 
-    const finalData = response.json
+    const finalData = response.json()
     return finalData
   } catch (error) {
     console.log('error', error)
