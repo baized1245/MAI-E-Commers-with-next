@@ -6,7 +6,7 @@ import InputComponent from '@/components/FormElements/InputComponent'
 import SelectComponent from '@/components/FormElements/SelectComponent'
 import { useRouter } from 'next/navigation'
 
-export default function page() {
+export default function Login() {
   const router = useRouter()
 
   return (
